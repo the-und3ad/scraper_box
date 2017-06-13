@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 import hubber.hubber as hubber
 import modules.tools.plaform_dependant as pd
@@ -12,6 +13,21 @@ tag = t.tag
 class Requirements(object):
     def __init__(self, module_dir):
         self.module_dir = module_dir
+
+        print "Testing Minimals For Operation"
+        if not os.path.exists(os.path.join(module_dir, 'required.json')):
+            try:
+                with open(os.path.join(module_dir, 'required.json'), 'wb') as f:
+                    requirements = {
+                        "oauth2_token": '',
+                        "logo": True,
+                        "modules": []
+                    }
+                    json.dump(requirements, f, indent=4, sort_keys=True)
+            except Exception:
+                print 'Generic Exception: ' + traceback.format_exc()
+            exit(1)
+
         self.requirements = self.get_requirements()
 
     def get_requirements(self):
@@ -19,19 +35,9 @@ class Requirements(object):
             with open(os.path.join(self.module_dir, 'required.json')) as f:
                 requirements = json.load(f)
                 return requirements
-        except:
-            try:
-                with open(os.path.join(self.module_dir, 'required.json'), 'a') as f:
-                    requirements = {
-                        "oauth2_token": '',
-                        "logo": True,
-                        "modules": []
-                    }
-                    json.dump(requirements, f, indent=4, sort_keys=True)
-
-            except:
-                print "Was Unable To Create Requirements"
-                exit(1)
+        except Exception:
+            print 'Generic Exception: ' + traceback.format_exc()
+            exit(1)
 
     def update_required(self):
         required = self.requirements
@@ -91,11 +97,16 @@ class Requirements(object):
         return self.requirements['logo']
 
     def toggle_tag(self):
-        if self.requirements['logo'] == 'True':
-            self.requirements['logo'] = "False"
+        if self.requirements['logo'] is True:
+            self.requirements['logo'] = False
         else:
-            self.requirements['logo'] = "True"
+            self.requirements['logo'] = True
         self.store_requirements()
+
+    def show_logo(self):
+        pd.clear_screen()
+        if self.show_tag():
+            print tag
 
     def add_module(self):
         self.show_logo()
@@ -172,7 +183,4 @@ class Requirements(object):
             import shutil
             shutil.rmtree(os.path.join(modules_path, option.replace('.', '_')))
 
-    def show_logo(self):
-        pd.clear_screen()
-        if "True" in self.show_tag():
-            print tag
+

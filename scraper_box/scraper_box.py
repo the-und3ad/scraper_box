@@ -14,29 +14,6 @@ available_modules = req.get_available()
 tag = t.tag
 
 
-def is_module_available(name):
-    for module in available_modules:
-        if name in module:
-            return True
-    return False
-
-
-def get_module_path(name):
-    if is_module_available(name):
-        for module in available_modules:
-            if name in module:
-                return module[name]['path']
-    return False
-
-
-def get_module_scraper_path(name):
-    if is_module_available(name.replace('.', '_')):
-        for module in req.requirements['modules']:
-                if name in module['name']:
-                    return module['scraper_location']
-    return False
-
-
 def main_menu():
     global available_modules
     show_logo()
@@ -53,33 +30,7 @@ def main_menu():
             available_modules = req.get_available()
             main_menu()
     if option is 4:
-        pass  # @TODO Add Help Text
-
-
-def scraper_testing_menu(sources):
-    scrapers = get_scrapers(sources)
-    show_logo()
-    opts = ["Test Scraper"]
-    if len(sources) > 1:
-        opts.append("Test Scrapers (Multiple)")
-        opts.append("Test All Scrapers")
-    option = choices.get_choice("Please Choose A Scraper Volume", "Enter Choice", opts, False)
-    if option is False:
-        main_menu()
-    if option is 1:
-        show_logo()
-        if len(sources) > 1:
-            opts = []
-            for scraper in scrapers:
-                for key in scraper:
-                    opts.append(key)
-            option = choices.get_choice("PLease choose scraper to test.", "Enter Choice", opts, True)
-        else:
-            option = source
-    if option is 2:
-        pass
-    if option is 3:
-        pass
+        help_menu()  # @TODO Add Help Text
 
 
 def choose_scraper_source():
@@ -130,20 +81,23 @@ def choose_scraper_source():
 def tool_menu():
     global available_modules
     show_logo()
-    opts = ["Show Modules", "Add Module"]
+    opts = []
+    if len(available_modules) > 0:
+        opts.append("Show Modules")
+    opts = ["Add Module"]
     if available_modules:
         opts.append("Edit Module")
         opts.append("Delete Module")
-    if req.show_tag() == "True":
+    if req.show_tag():
         opts.append("Disable Shitty Logo")
     else:
         opts.append("Enable Shitty Logo")
-    option = choices.get_choice("Select Option From Below.", "Enter Option", opts, False)
-    if option is 0:
+    option = choices.get_choice("Select Option From Below.", "Enter Option", opts, True)
+    if option is False:
         main_menu()
-    if option is 1:
-        exit(0)
-    if option is 2:
+    if "Show Modules" in option:
+        pass
+    if "Add Modules" in option:
         if req.add_module() is True:
             available_modules = req.get_available()
             show_logo()
@@ -153,15 +107,45 @@ def tool_menu():
             if option == 1:
                 if req.update_required() is True:
                     available_modules = req.get_available()
-    if option is 3:
+    if "Edit Module" in option:
         req.edit_module()
         available_modules = req.get_available()
-    if option is 4:
+    if "Delete Module" in option:
         req.delete_module(modules_path)
         available_modules = req.get_available()
-    if option is 5:
+    if "Logo" in option:
         req.toggle_tag()
     main_menu()
+
+
+def help_menu():
+    pass
+
+
+def scraper_testing_menu(sources):
+    scrapers = get_scrapers(sources)
+    show_logo()
+    opts = ["Test Scraper"]
+    if len(sources) > 1:
+        opts.append("Test Scrapers (Multiple)")
+        opts.append("Test All Scrapers")
+    option = choices.get_choice("Please Choose A Scraper Volume", "Enter Choice", opts, False)
+    if option is False:
+        main_menu()
+    if option is 1:
+        show_logo()
+        if len(sources) > 1:
+            opts = []
+            for scraper in scrapers:
+                for key in scraper:
+                    opts.append(key)
+            option = choices.get_choice("PLease choose scraper to test.", "Enter Choice", opts, True)
+        else:
+            option = source
+    if option is 2:
+        pass
+    if option is 3:
+        pass
 
 
 def test_scrapers(names_list):
@@ -209,9 +193,31 @@ def get_scrapers(source_=None):
     return scrapers
 
 
+def is_module_available(name):
+    for module in available_modules:
+        if name in module:
+            return True
+    return False
+
+
+def get_module_path(name):
+    if is_module_available(name):
+        for module in available_modules:
+            if name in module:
+                return module[name]['path']
+    return False
+
+
+def get_module_scraper_path(name):
+    if is_module_available(name.replace('.', '_')):
+        for module in req.requirements['modules']:
+            if name in module['name']:
+                return module['scraper_location']
+    return False
+
 def show_logo():
     pd.clear_screen()
-    if "True" in req.show_tag():
+    if req.show_tag():
         print tag
 
 
